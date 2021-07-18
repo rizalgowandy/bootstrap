@@ -583,7 +583,7 @@ Trigger dropdown menus at the left of the elements by adding `.dropstart` to the
 
 ## Menu items
 
-Historically dropdown menu contents *had* to be links, but that's no longer the case with v4. Now you can optionally use `<button>` elements in your dropdowns instead of just `<a>`s.
+You can use `<a>` or `<button>` elements as dropdown items.
 
 {{< example >}}
 <div class="dropdown">
@@ -1033,7 +1033,7 @@ Options can be passed via data attributes or JavaScript. For data attributes, ap
       <td><code>boundary</code></td>
       <td>string | element</td>
       <td><code>'clippingParents'</code></td>
-      <td>Overflow constraint boundary of the dropdown menu. By default it's <code>'clippingParents'</code> and can accept an HTMLElement reference (JavaScript only). For more information refer to Popper's <a href="https://popper.js.org/docs/v2/utils/detect-overflow/#boundary">detectOverflow docs</a>.</td>
+      <td>Overflow constraint boundary of the dropdown menu (applies only to Popper's preventOverflow modifier). By default it's <code>'clippingParents'</code> and can accept an HTMLElement reference (via JavaScript only). For more information refer to Popper's <a href="https://popper.js.org/docs/v2/utils/detect-overflow/#boundary">detectOverflow docs</a>.</td>
     </tr>
     <tr>
       <td><code>reference</code></td>
@@ -1136,9 +1136,20 @@ var dropdown = new bootstrap.Dropdown(element, {
       </td>
     </tr>
     <tr>
-      <td><code>getInstance</code></td>
       <td>
-        Static method which allows you to get the dropdown instance associated with a DOM element.
+        <code>getInstance</code>
+      </td>
+      <td>
+        Static method which allows you to get the dropdown instance associated to a DOM element, you can use it like this: <code>bootstrap.Dropdown.getInstance(element)</code>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>getOrCreateInstance</code>
+      </td>
+      <td>
+        Static method which returns a dropdown instance associated to a DOM element or create a new one in case it wasn't initialised.
+        You can use it like this: <code>bootstrap.Dropdown.getOrCreateInstance(element)</code>
       </td>
     </tr>
   </tbody>
