@@ -18,9 +18,9 @@
       <h1>Toast <small>Bootstrap Visual Test</small></h1>
 
       <div class="row mt-3">
-        <div class="col-md-12">
-          <button id="btnShowToast" class="btn btn-primary">Show toast</button>
-          <button id="btnHideToast" class="btn btn-primary">Hide toast</button>
+        <div class="md:col-12">
+          <button id="btnShowToast" class="btn-solid theme-primary">Show toast</button>
+          <button id="btnHideToast" class="btn-solid theme-primary">Hide toast</button>
         </div>
       </div>
     </div>
@@ -41,7 +41,7 @@
         <div class="toast-header">
           <span class="d-block bg-primary rounded me-2" style="width: 20px; height: 20px;"></span>
           <strong class="me-auto">Bootstrap</strong>
-          <small class="text-muted">2 seconds ago</small>
+          <small class="fg-2">2 seconds ago</small>
           <button type="button" class="ms-2 mb-1 btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
@@ -50,33 +50,19 @@
       </div>
     </div>
 
-    <script src="../../dist/dom/event-handler.js"></script>
-    <script src="../../dist/dom/manipulator.js"></script>
-    <script src="../../dist/dom/data.js"></script>
-    <script src="../../dist/base-component.js"></script>
-    <script src="../../dist/toast.js"></script>
-    <script>
-      window.addEventListener('load', function () {
-        Array.from(document.querySelectorAll('.toast'))
-          .forEach(function (toastNode) {
-            new Toast(toastNode)
-          })
+    <script type="module">
+      import { Toast } from '../../../dist/js/bootstrap.bundle.js'
 
-          document.getElementById('btnShowToast').addEventListener('click', function () {
-            Array.from(document.querySelectorAll('.toast'))
-              .forEach(function (toastNode) {
-                var toast = Toast.getInstance(toastNode)
-                toast.show()
-              })
-          })
+      window.addEventListener('load', () => {
+        document.querySelectorAll('.toast').forEach(toastEl => new Toast(toastEl))
 
-          document.getElementById('btnHideToast').addEventListener('click', function () {
-            Array.from(document.querySelectorAll('.toast'))
-              .forEach(function (toastNode) {
-                var toast = Toast.getInstance(toastNode)
-                toast.hide()
-              })
-          })
+        document.getElementById('btnShowToast').addEventListener('click', () => {
+          document.querySelectorAll('.toast').forEach(toastEl => Toast.getInstance(toastEl).show())
+        })
+
+        document.getElementById('btnHideToast').addEventListener('click', () => {
+          document.querySelectorAll('.toast').forEach(toastEl => Toast.getInstance(toastEl).hide())
+        })
       })
     </script>
   </body>

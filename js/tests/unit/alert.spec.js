@@ -1,8 +1,6 @@
-import Alert from '../../src/alert'
-import { getTransitionDurationFromElement } from '../../src/util/index'
-
-/** Test helpers */
-import { getFixture, clearFixture, jQueryMock } from '../helpers/fixture'
+import Alert from '../../src/alert.js'
+import { getTransitionDurationFromElement } from '../../src/util/index.js'
+import { clearFixture, getFixture } from '../helpers/fixture.js'
 
 describe('Alert', () => {
   let fixtureEl
@@ -20,14 +18,14 @@ describe('Alert', () => {
 
     const alertEl = fixtureEl.querySelector('.alert')
     const alertBySelector = new Alert('.alert')
-    const alertByElement = new Alert(alertEl)
-
     expect(alertBySelector._element).toEqual(alertEl)
+
+    const alertByElement = new Alert(alertEl)
     expect(alertByElement._element).toEqual(alertEl)
   })
 
   it('should return version', () => {
-    expect(typeof Alert.VERSION).toEqual('string')
+    expect(Alert.VERSION).toEqual(jasmine.any(String))
   })
 
   describe('DATA_KEY', () => {
@@ -47,7 +45,7 @@ describe('Alert', () => {
       const button = document.querySelector('button')
 
       button.click()
-      expect(document.querySelectorAll('.alert').length).toEqual(0)
+      expect(document.querySelectorAll('.alert')).toHaveSize(0)
     })
 
     it('should close an alert without instantiating it manually with the parent selector', () => {
@@ -60,70 +58,86 @@ describe('Alert', () => {
       const button = document.querySelector('button')
 
       button.click()
-      expect(document.querySelectorAll('.alert').length).toEqual(0)
+      expect(document.querySelectorAll('.alert')).toHaveSize(0)
     })
   })
 
   describe('close', () => {
-    it('should close an alert', done => {
-      const spy = jasmine.createSpy('spy', getTransitionDurationFromElement)
-      fixtureEl.innerHTML = '<div class="alert"></div>'
+    it('should close an alert', () => {
+      return new Promise(resolve => {
+        const spy = jasmine.createSpy('spy', getTransitionDurationFromElement)
+        fixtureEl.innerHTML = '<div class="alert"></div>'
 
-      const alertEl = document.querySelector('.alert')
-      const alert = new Alert(alertEl)
+        const alertEl = document.querySelector('.alert')
+        const alert = new Alert(alertEl)
 
-      alertEl.addEventListener('closed.bs.alert', () => {
-        expect(document.querySelectorAll('.alert').length).toEqual(0)
-        expect(spy).not.toHaveBeenCalled()
-        done()
+        alertEl.addEventListener('closed.bs.alert', () => {
+          expect(document.querySelectorAll('.alert')).toHaveSize(0)
+          expect(spy).not.toHaveBeenCalled()
+          resolve()
+        })
+
+        alert.close()
       })
-
-      alert.close()
     })
 
-    it('should close alert with fade class', done => {
-      fixtureEl.innerHTML = '<div class="alert fade"></div>'
+    it('should close alert with fade class', () => {
+      return new Promise(resolve => {
+        fixtureEl.innerHTML = '<div class="alert fade"></div>'
 
-      const alertEl = document.querySelector('.alert')
-      const alert = new Alert(alertEl)
+        const alertEl = document.querySelector('.alert')
+        const alert = new Alert(alertEl)
 
-      alertEl.addEventListener('transitionend', () => {
-        expect().nothing()
+        alertEl.addEventListener('transitionend', () => {
+          expect().nothing()
+        })
+
+        alertEl.addEventListener('closed.bs.alert', () => {
+          expect(document.querySelectorAll('.alert')).toHaveSize(0)
+          resolve()
+        })
+
+        alert.close()
       })
-
-      alertEl.addEventListener('closed.bs.alert', () => {
-        expect(document.querySelectorAll('.alert').length).toEqual(0)
-        done()
-      })
-
-      alert.close()
     })
 
-    it('should not remove alert if close event is prevented', done => {
-      fixtureEl.innerHTML = '<div class="alert"></div>'
+    it('should mark the exit with the hiding class', async () => {
+      fixtureEl.innerHTML = '<div class="alert show"></div>'
 
       const alertEl = document.querySelector('.alert')
       const alert = new Alert(alertEl)
+      const closed = alert.close()
 
-      const endTest = () => {
-        setTimeout(() => {
-          expect(alert._removeElement).not.toHaveBeenCalled()
-          done()
-        }, 10)
-      }
+      expect(alertEl).toHaveClass('hiding')
+      expect(alertEl).not.toHaveClass('show')
 
-      spyOn(alert, '_removeElement')
+      await closed
 
-      alertEl.addEventListener('close.bs.alert', event => {
-        event.preventDefault()
-        endTest()
+      expect(document.querySelectorAll('.alert')).toHaveSize(0)
+    })
+
+    it('should not remove alert if close event is prevented', () => {
+      return new Promise((resolve, reject) => {
+        fixtureEl.innerHTML = '<div class="alert"></div>'
+
+        const getAlert = () => document.querySelector('.alert')
+        const alertEl = getAlert()
+        const alert = new Alert(alertEl)
+
+        alertEl.addEventListener('close.bs.alert', event => {
+          event.preventDefault()
+          setTimeout(() => {
+            expect(getAlert()).not.toBeNull()
+            resolve()
+          }, 10)
+        })
+
+        alertEl.addEventListener('closed.bs.alert', () => {
+          reject(new Error('should not fire closed event'))
+        })
+
+        alert.close()
       })
-
-      alertEl.addEventListener('closed.bs.alert', () => {
-        endTest()
-      })
-
-      alert.close()
     })
   })
 
@@ -134,57 +148,11 @@ describe('Alert', () => {
       const alertEl = document.querySelector('.alert')
       const alert = new Alert(alertEl)
 
-      expect(Alert.getInstance(alertEl)).toBeDefined()
+      expect(Alert.getInstance(alertEl)).not.toBeNull()
 
       alert.dispose()
 
       expect(Alert.getInstance(alertEl)).toBeNull()
-    })
-  })
-
-  describe('jQueryInterface', () => {
-    it('should handle config passed and toggle existing alert', () => {
-      fixtureEl.innerHTML = '<div class="alert"></div>'
-
-      const alertEl = fixtureEl.querySelector('.alert')
-      const alert = new Alert(alertEl)
-
-      spyOn(alert, 'close')
-
-      jQueryMock.fn.alert = Alert.jQueryInterface
-      jQueryMock.elements = [alertEl]
-
-      jQueryMock.fn.alert.call(jQueryMock, 'close')
-
-      expect(alert.close).toHaveBeenCalled()
-    })
-
-    it('should create new alert instance and call close', () => {
-      fixtureEl.innerHTML = '<div class="alert"></div>'
-
-      const alertEl = fixtureEl.querySelector('.alert')
-
-      jQueryMock.fn.alert = Alert.jQueryInterface
-      jQueryMock.elements = [alertEl]
-
-      jQueryMock.fn.alert.call(jQueryMock, 'close')
-
-      expect(Alert.getInstance(alertEl)).toBeDefined()
-      expect(fixtureEl.querySelector('.alert')).toBeNull()
-    })
-
-    it('should just create an alert instance without calling close', () => {
-      fixtureEl.innerHTML = '<div class="alert"></div>'
-
-      const alertEl = fixtureEl.querySelector('.alert')
-
-      jQueryMock.fn.alert = Alert.jQueryInterface
-      jQueryMock.elements = [alertEl]
-
-      jQueryMock.fn.alert.call(jQueryMock)
-
-      expect(Alert.getInstance(alertEl)).toBeDefined()
-      expect(fixtureEl.querySelector('.alert')).not.toBeNull()
     })
   })
 
@@ -204,7 +172,29 @@ describe('Alert', () => {
 
       const div = fixtureEl.querySelector('div')
 
-      expect(Alert.getInstance(div)).toEqual(null)
+      expect(Alert.getInstance(div)).toBeNull()
+    })
+  })
+
+  describe('getOrCreateInstance', () => {
+    it('should return alert instance', () => {
+      fixtureEl.innerHTML = '<div></div>'
+
+      const div = fixtureEl.querySelector('div')
+      const alert = new Alert(div)
+
+      expect(Alert.getOrCreateInstance(div)).toEqual(alert)
+      expect(Alert.getInstance(div)).toEqual(Alert.getOrCreateInstance(div, {}))
+      expect(Alert.getOrCreateInstance(div)).toBeInstanceOf(Alert)
+    })
+
+    it('should return new instance when there is no alert instance', () => {
+      fixtureEl.innerHTML = '<div></div>'
+
+      const div = fixtureEl.querySelector('div')
+
+      expect(Alert.getInstance(div)).toBeNull()
+      expect(Alert.getOrCreateInstance(div)).toBeInstanceOf(Alert)
     })
   })
 })

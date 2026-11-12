@@ -1,7 +1,5 @@
 # Ignore docs files
 /_site/
-# Hugo resources folder
-/resources/
 
 # Numerous always-ignore extensions
 *.diff
@@ -18,6 +16,8 @@
 # OS or Editor folders
 ._*
 .cache
+.claude
+.cursor
 .DS_Store
 .idea
 .project
@@ -28,7 +28,6 @@
 *.sublime-workspace
 nbproject
 Thumbs.db
-/.vscode/
 # Local Netlify folder
 .netlify
 
@@ -37,5 +36,12 @@ Thumbs.db
 *.komodoproject
 
 # Folders to ignore
+/dist-sass/
 /js/coverage/
-/node_modules/
+/node_modules
+
+# Site
+/site/dist
+/site/node_modules
+/site/.astro
+/site/public
